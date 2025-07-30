@@ -1,15 +1,19 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
 import { generateRandomString } from 'src/helper/generate';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async register(dto: RegisterDto) {
-    // Việc kiểm tra mật khẩu trùng khớp đã được DTO validator xử lý
     const { email, password, fullName } = dto;
 
     const existingUser = await this.prisma.user.findUnique({
@@ -27,10 +31,24 @@ export class UsersService {
       },
     });
 
-    // Không bao giờ trả về password đã hash trong response
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _, ...result } = user;
 
     return { message: 'Đăng ký thành công', user: result };
+  }
+
+  async login(dto: LoginDto) {
+    const { email, password } = dto;
+
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) throw new UnauthorizedException('Email không tồn tại');
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) throw new UnauthorizedException('Mật khẩu không đúng');
+
+    const { password: _, ...result } = user;
+    return {
+      message: 'Đăng nhập thành công',
+      user: result,
+    };
   }
 }
