@@ -1,4 +1,5 @@
-import { IsEmail, IsNotEmpty, Matches, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
+import { Match } from '../validators/match.validator';
 
 export class RegisterDto {
   @IsNotEmpty({ message: 'Họ và tên không được để trống' })
@@ -12,5 +13,6 @@ export class RegisterDto {
   password: string;
 
   @MinLength(6, { message: 'Xác nhận mật khẩu phải có ít nhất 6 ký tự' })
+  @Match('password', { message: 'Mật khẩu và xác nhận mật khẩu không khớp' })
   confirmPassword: string;
 }
