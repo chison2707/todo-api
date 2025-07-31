@@ -89,4 +89,14 @@ export class TasksService {
       data: { status: status },
     });
   }
+
+  async deleteTask(id: number, userId: number) {
+    return this.prisma.task.delete({
+      where: {
+        id: id,
+        createdById: userId,
+        deleted: false,
+      },
+    });
+  }
 }

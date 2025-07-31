@@ -1,16 +1,18 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
   Post,
   Query,
   Req,
+  Res,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/createTask.dto';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 
 @Controller('tasks')
 export class TasksController {
@@ -44,5 +46,21 @@ export class TasksController {
     const userId = req.user!.id;
     const taskId = parseInt(id);
     return this.tasksService.changeStatus(taskId, status, userId);
+  }
+
+  @Delete('delete/:id')
+  async deleteTask(
+    @Param('id') id: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const userId = req.user!.id;
+    const taskId = parseInt(id);
+    const result = await this.tasksService.deleteTask(taskId, userId);
+
+    return res.status(200).json({
+      message: 'Xóa công việc thành công',
+      data: result,
+    });
   }
 }
