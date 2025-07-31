@@ -18,4 +18,11 @@ export class TasksController {
     const userId = req.user!.id;
     return this.tasksService.findAll(userId);
   }
+
+  @Get(':id')
+  async detailTask(@Req() req: Request) {
+    const userId = req.user!.id;
+    const taskId = parseInt(req.params.id);
+    return this.tasksService.detailTask(taskId, userId);
+  }
 }

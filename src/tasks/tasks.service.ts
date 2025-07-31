@@ -69,4 +69,14 @@ export class TasksService {
       },
     });
   }
+
+  async detailTask(id: number, userId: number) {
+    return this.prisma.task.findFirst({
+      where: {
+        id: id,
+        deleted: false,
+        createdById: userId,
+      },
+    });
+  }
 }
