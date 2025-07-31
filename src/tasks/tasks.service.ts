@@ -79,4 +79,14 @@ export class TasksService {
       },
     });
   }
+
+  async changeStatus(id: number, status: string, userId: number) {
+    if (status !== 'todo' && status !== 'doing' && status !== 'done') {
+      throw new UnprocessableEntityException('Trạng thái không hợp lệ');
+    }
+    return this.prisma.task.update({
+      where: { id: id, createdById: userId, deleted: false },
+      data: { status: status },
+    });
+  }
 }

@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/createTask.dto';
 import { Request } from 'express';
@@ -20,9 +29,20 @@ export class TasksController {
   }
 
   @Get(':id')
-  async detailTask(@Req() req: Request) {
+  async detailTask(@Param('id') id: string, @Req() req: Request) {
     const userId = req.user!.id;
-    const taskId = parseInt(req.params.id);
+    const taskId = parseInt(id);
     return this.tasksService.detailTask(taskId, userId);
+  }
+
+  @Patch('changeStatus/:id')
+  async changeStatus(
+    @Param('id') id: string,
+    @Query('status') status: string,
+    @Req() req: Request,
+  ) {
+    const userId = req.user!.id;
+    const taskId = parseInt(id);
+    return this.tasksService.changeStatus(taskId, status, userId);
   }
 }
