@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateTaskDto } from './dto/createTask.dto';
 
@@ -7,6 +7,13 @@ export class TasksService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateTaskDto, userId: number) {
+    if (
+      dto.status !== 'todo' &&
+      dto.status !== 'doing' &&
+      dto.status !== 'done'
+    ) {
+      throw new UnprocessableEntityException('Trạng thái không hợp lệ');
+    }
     return this.prisma.task.create({
       data: {
         title: dto.title,
@@ -20,12 +27,45 @@ export class TasksService {
     });
   }
 
-  async fillAll() {
+  async findAll(userId: number) {
     return this.prisma.task.findMany({
-      where: { deleted: false },
+      where: {
+        deleted: false,
+        OR: [
+          { createdById: userId },
+          {
+            assignedUsers: {
+              some: {
+                userId: userId,
+              },
+            },
+          },
+        ],
+      },
       include: {
-        createdBy: true,
-        assignedUsers: true,
+        createdBy: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+          },
+        },
+        assignedUsers: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                fullName: true,
+                email: true,
+              },
+            },
+          },
+        },
+        subTasks: true,
+        taskParent: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
   }
