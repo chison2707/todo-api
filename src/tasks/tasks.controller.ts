@@ -63,4 +63,21 @@ export class TasksController {
       data: result,
     });
   }
+
+  @Patch('update/:id')
+  async updateTask(
+    @Param('id') id: string,
+    @Body() dto: CreateTaskDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const userId = req.user!.id;
+    const taskId = parseInt(id);
+    const updatedTask = await this.tasksService.updateTask(taskId, dto, userId);
+
+    return res.status(200).json({
+      message: 'Cập nhật công việc thành công',
+      data: updatedTask,
+    });
+  }
 }

@@ -99,4 +99,26 @@ export class TasksService {
       },
     });
   }
+
+  async updateTask(id: number, dto: CreateTaskDto, userId: number) {
+    if (
+      dto.status !== 'todo' &&
+      dto.status !== 'doing' &&
+      dto.status !== 'done'
+    ) {
+      throw new UnprocessableEntityException('Trạng thái không hợp lệ');
+    }
+    return this.prisma.task.update({
+      where: { id: id, createdById: userId, deleted: false },
+      data: {
+        title: dto.title,
+        status: dto.status,
+        content: dto.content,
+        timeStart: dto.timeStart ? new Date(dto.timeStart) : undefined,
+        timeFinish: dto.timeFinish ? new Date(dto.timeFinish) : undefined,
+        taskParentId: dto.taskParentId,
+        updatedAt: new Date(),
+      },
+    });
+  }
 }
